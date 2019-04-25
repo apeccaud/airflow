@@ -110,14 +110,14 @@ class RedshiftToS3Transfer(BaseOperator):
             cursor.execute(columns_query)
             rows = cursor.fetchall()
             columns = [row[0] for row in rows]
-            column_names = ', '.join("{0}".format(c) for c in columns)
+            column_names = ', '.join('"{0}"'.format(c) for c in columns)
             column_headers = ', '.join("\\'{0}\\'".format(c) for c in columns)
-            column_castings = ', '.join("CAST({0} AS text) AS {0}".format(c)
+            column_castings = ', '.join('CAST("{0}" AS text) AS {0}'.format(c)
                                         for c in columns)
 
             select_query = """SELECT {column_names} FROM
                                     (SELECT 2 sort_order, {column_castings}
-                                     FROM {schema}.{table}
+                                     FROM "{schema}"."{table}"
                                     UNION ALL
                                     SELECT 1 sort_order, {column_headers})
                                  ORDER BY sort_order"""\
@@ -127,7 +127,7 @@ class RedshiftToS3Transfer(BaseOperator):
                                     schema=self.schema,
                                     table=self.table)
         else:
-            select_query = "SELECT * FROM {schema}.{table}"\
+            select_query = 'SELECT * FROM "{schema}"."{table}"'\
                 .format(schema=self.schema,
                         table=self.table)
 
